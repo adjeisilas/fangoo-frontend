@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "neuroforge-nuxt": {
+      "source": "CayOpoku/neuroforge-nuxt",
+      "sourceType": "github",
+      "skillPath": "skills/neuroforge-nuxt/SKILL.md",
+      "computedHash": "db09391df80195f21d58cb6b256aeb957815ad8bfd904533e8df095360b94572"
+    }
+  }
+}
