@@ -11,9 +11,15 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: 'http://localhost:4000/api/v1',
-      // Absolute origin used for canonicals, og:url, sitemap and robots.
-      // Override per environment with NUXT_PUBLIC_SITE_URL.
-      siteUrl: 'https://fangoo.com',
+      /**
+       * Absolute origin used for canonicals, og:url, sitemap and robots.
+       *
+       * Deliberately localhost, not a real domain: a default that names a domain
+       * makes every canonical tag advertise it, whether or not that domain is
+       * ours. Localhost is truthful in development and is rejected outright by
+       * the production boot guard, so a deploy has to state its own origin.
+       */
+      siteUrl: 'http://localhost:3000',
     },
   },
   app: {

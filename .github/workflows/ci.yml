@@ -33,8 +33,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NUXT_PUBLIC_API_BASE: https://api.fangoo.com/api/v1
-          NUXT_PUBLIC_SITE_URL: https://fangoo.com
+          NUXT_PUBLIC_API_BASE: https://api.example.com/api/v1
+          NUXT_PUBLIC_SITE_URL: https://web.example.com
 
       # The guard only runs at server start, so CI starts the built server to
       # prove it actually boots rather than only that it compiled.
@@ -56,8 +56,8 @@ jobs:
         env:
           NODE_ENV: production
           PORT: 3000
-          NUXT_PUBLIC_API_BASE: https://api.fangoo.com/api/v1
-          NUXT_PUBLIC_SITE_URL: https://fangoo.com
+          NUXT_PUBLIC_API_BASE: https://api.example.com/api/v1
+          NUXT_PUBLIC_SITE_URL: https://web.example.com
 
       # The guard is only useful if it actually refuses a bad configuration.
       - name: Boot guard rejects a localhost API base
@@ -65,7 +65,7 @@ jobs:
           set +e
           NODE_ENV=production PORT=3001 \
           NUXT_PUBLIC_API_BASE=http://localhost:4000/api/v1 \
-          NUXT_PUBLIC_SITE_URL=https://fangoo.com \
+          NUXT_PUBLIC_SITE_URL=https://web.example.com \
             node .output/server/index.mjs > guard.log 2>&1
           STATUS=$?
           set -e
