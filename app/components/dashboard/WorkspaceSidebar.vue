@@ -110,12 +110,16 @@ const initials = computed(() => {
         </button>
       </div>
 
+      <!--
+        Says where it goes, not what the domain is. The literal "fangoo.com" here
+        was wrong the moment the app was served from anywhere else.
+      -->
       <NuxtLink
         to="/"
         class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-ink-400 transition-colors hover:bg-white/5 hover:text-white"
       >
         <BaseAppIcon name="arrowRight" :size="13" class="rotate-180" />
-        Back to fangoo.com
+        Back to the marketplace
       </NuxtLink>
     </div>
   </aside>
