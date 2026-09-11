@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      # Production values, so the build is exercised the way it ships. The
+      # server refuses to start if these point at localhost, so a build using
+      # the development defaults would pass here and fail on deploy.
+      - name: Build
+        run: npm run build
+        env:
+          NUXT_PUBLIC_API_BASE: https://api.fangoo.com/api/v1
+          NUXT_PUBLIC_SITE_URL: https://fangoo.com
+
+      # The guard only runs at server start, so CI starts the built server to
+      # prove it actually boots rather than only that it compiled.
+      - name: Production server starts and serves
+        run: |
+          node .output/server/index.mjs &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:3000/robots.txt > /dev/null; then
+              echo "server responded"
+              kill $SERVER_PID
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "server did not respond in 30s"
+          kill $SERVER_PID 2>/dev/null || true
+          exit 1
+        env:
+          NODE_ENV: production
+          PORT: 3000
+          NUXT_PUBLIC_API_BASE: https://api.fangoo.com/api/v1
+          NUXT_PUBLIC_SITE_URL: https://fangoo.com
+
+      # The guard is only useful if it actually refuses a bad configuration.
+      - name: Boot guard rejects a localhost API base
+        run: |
+          set +e
+          NODE_ENV=production PORT=3001 \
+          NUXT_PUBLIC_API_BASE=http://localhost:4000/api/v1 \
+          NUXT_PUBLIC_SITE_URL=https://fangoo.com \
+            node .output/server/index.mjs > guard.log 2>&1
+          STATUS=$?
+          set -e
+          if [ $STATUS -eq 0 ]; then
+            echo "server started with a localhost API base — the guard did not fire"
+            exit 1
+          fi
+          grep -q "NUXT_PUBLIC_API_BASE" guard.log
+          echo "guard refused the bad configuration, as intended"

@@ -1,0 +1,20 @@
+# Keep the build context small and never ship local state into an image.
+node_modules
+.output
+.nuxt
+.git
+.env
+.env.*
+!.env.example
+
+# Editor and agent tooling — irrelevant to a build.
+.agents
+.claude
+.cursor
+.devin
+.windsurf
+neuroforge
+
+# Local artefacts.
+coverage
+*.log
