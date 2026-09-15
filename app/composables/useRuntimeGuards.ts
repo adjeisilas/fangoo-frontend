@@ -23,14 +23,23 @@ export const isAbsoluteHttpUrl = (value: string) => {
   }
 };
 
+export interface RuntimeGuardOptions {
+  /**
+   * Permits localhost URLs. Only for a stack whose browser genuinely runs on the
+   * same machine — the docker-compose parity setup. Everything else is still
+   * enforced: the values must be present and absolute.
+   */
+  allowLocalUrls?: boolean;
+}
+
 /**
  * Returns every reason this configuration would be wrong in production.
  * Empty means it is safe to serve.
  */
-export const runtimeConfigErrors = (input: {
-  apiBase?: unknown;
-  siteUrl?: unknown;
-}): string[] => {
+export const runtimeConfigErrors = (
+  input: { apiBase?: unknown; siteUrl?: unknown },
+  options: RuntimeGuardOptions = {},
+): string[] => {
   const errors: string[] = [];
   const apiBase = String(input.apiBase ?? '').trim();
   const siteUrl = String(input.siteUrl ?? '').trim();
@@ -41,7 +50,7 @@ export const runtimeConfigErrors = (input: {
     errors.push(
       `NUXT_PUBLIC_API_BASE must be an absolute http(s) URL (got "${apiBase}").`,
     );
-  } else if (isLocalUrl(apiBase)) {
+  } else if (!options.allowLocalUrls && isLocalUrl(apiBase)) {
     // The important one: browsers resolve this against the visitor's machine.
     errors.push(
       `NUXT_PUBLIC_API_BASE points at ${apiBase}, which resolves to each visitor's own machine. Set it to the public API origin.`,
@@ -54,7 +63,7 @@ export const runtimeConfigErrors = (input: {
     errors.push(
       `NUXT_PUBLIC_SITE_URL must be an absolute http(s) URL (got "${siteUrl}").`,
     );
-  } else if (isLocalUrl(siteUrl)) {
+  } else if (!options.allowLocalUrls && isLocalUrl(siteUrl)) {
     // Wrong here means every canonical, og:url and sitemap entry is wrong.
     errors.push(
       `NUXT_PUBLIC_SITE_URL points at ${siteUrl}. Canonical tags, og:url and sitemap.xml would all advertise localhost.`,

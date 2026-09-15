@@ -18,10 +18,17 @@ export default defineNitroPlugin(() => {
   if (import.meta.dev) return;
 
   const config = useRuntimeConfig();
-  const errors = runtimeConfigErrors({
-    apiBase: config.public?.apiBase,
-    siteUrl: config.public?.siteUrl,
-  });
+  const errors = runtimeConfigErrors(
+    {
+      apiBase: config.public?.apiBase,
+      siteUrl: config.public?.siteUrl,
+    },
+    {
+      // Read from process.env, not runtimeConfig, so it can never be baked into
+      // the client bundle. Set only by the docker-compose parity stack.
+      allowLocalUrls: process.env.FANGOO_ALLOW_LOCAL_URLS === 'true',
+    },
+  );
 
   if (errors.length > 0) {
     throw new Error(

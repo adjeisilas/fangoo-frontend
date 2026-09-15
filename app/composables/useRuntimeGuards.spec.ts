@@ -62,6 +62,33 @@ describe('runtimeConfigErrors', () => {
     expect(errors[0]).toContain('NUXT_PUBLIC_API_BASE');
   });
 
+  describe('allowLocalUrls (docker-compose parity only)', () => {
+    const local = {
+      apiBase: 'http://localhost:4200/api/v1',
+      siteUrl: 'http://localhost:3200',
+    };
+
+    it('rejects localhost by default', () => {
+      expect(runtimeConfigErrors(local)).toHaveLength(2);
+    });
+
+    it('permits localhost when the stack opts in', () => {
+      expect(runtimeConfigErrors(local, { allowLocalUrls: true })).toEqual([]);
+    });
+
+    /** The opt-out relaxes one rule, not all of them. */
+    it('still rejects missing or relative values when opted in', () => {
+      const errors = runtimeConfigErrors(
+        { apiBase: '', siteUrl: '/relative' },
+        { allowLocalUrls: true },
+      );
+
+      expect(errors).toHaveLength(2);
+      expect(errors[0]).toContain('required');
+      expect(errors[1]).toContain('absolute');
+    });
+  });
+
   it('allows http for an internal or staging host', () => {
     expect(
       runtimeConfigErrors({ ...good, apiBase: 'http://api.internal:4000/api/v1' }),
