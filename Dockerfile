@@ -10,7 +10,11 @@
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# `--ignore-scripts` is required, not an optimisation: the postinstall hook runs
+# `nuxt prepare`, and at this point only the manifests have been copied — there
+# is no nuxt.config.ts or app/ for it to prepare. `nuxt build` runs the same
+# preparation itself once the source is present in the next stage.
+RUN npm ci --ignore-scripts --no-audit --no-fund
 
 FROM node:24-alpine AS build
 WORKDIR /app
