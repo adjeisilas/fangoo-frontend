@@ -1,5 +1,6 @@
 import type { Role } from '../types/auth.js';
 import type { FuelType } from '../types/fuel.js';
+import type { DeliveryArea, Region } from '../types/delivery-area.js';
 
 export interface AdminUser {
   id: string;
@@ -20,6 +21,20 @@ export interface AdminUser {
 
 export interface AdminFuelType extends FuelType {
   _count: { supplierFuels: number };
+}
+
+/**
+ * `GET /delivery-areas/admin/all`: every area, inactive ones included, with how
+ * many supplier coverages, orders and requests use it.
+ */
+export interface AdminDeliveryArea extends DeliveryArea {
+  _count: { suppliers: number; orders: number; requests: number };
+}
+
+export interface DeliveryAreaInput {
+  name: string;
+  city: string;
+  regionId: string;
 }
 
 export interface AdminFuelListing {
@@ -89,4 +104,22 @@ export const useAdminCatalogue = () => {
     listFuelListings,
     setListingSuspension,
   };
+};
+
+export const useAdminDeliveryAreas = () => {
+  const api = useApi();
+
+  const listAreas = () => api.get<AdminDeliveryArea[]>('/delivery-areas/admin/all');
+
+  const listRegions = () => api.get<Region[]>('/delivery-areas/regions');
+
+  const createArea = (input: DeliveryAreaInput) =>
+    api.post<DeliveryArea>('/delivery-areas', input);
+
+  const updateArea = (
+    id: string,
+    payload: Partial<DeliveryAreaInput> & { isActive?: boolean },
+  ) => api.patch<DeliveryArea>(`/delivery-areas/${id}`, payload);
+
+  return { listAreas, listRegions, createArea, updateArea };
 };
