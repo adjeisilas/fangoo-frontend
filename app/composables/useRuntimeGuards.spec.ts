@@ -89,6 +89,32 @@ describe('runtimeConfigErrors', () => {
     });
   });
 
+  describe('apiBaseServer (optional, server-side rendering only)', () => {
+    it('is not required', () => {
+      expect(runtimeConfigErrors(good)).toEqual([]);
+    });
+
+    it('accepts an address on the container network', () => {
+      expect(
+        runtimeConfigErrors({ ...good, apiBaseServer: 'http://api:4000/api/v1' }),
+      ).toEqual([]);
+    });
+
+    /** No browser ever calls it, so the localhost rule does not apply. */
+    it('may point at localhost', () => {
+      expect(
+        runtimeConfigErrors({ ...good, apiBaseServer: 'http://localhost:4000/api/v1' }),
+      ).toEqual([]);
+    });
+
+    it('rejects a relative value, naming the variable', () => {
+      const errors = runtimeConfigErrors({ ...good, apiBaseServer: '/api/v1' });
+
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain('NUXT_API_BASE_SERVER');
+    });
+  });
+
   it('allows http for an internal or staging host', () => {
     expect(
       runtimeConfigErrors({ ...good, apiBase: 'http://api.internal:4000/api/v1' }),

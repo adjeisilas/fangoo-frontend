@@ -1,7 +1,11 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'guest', layout: 'auth' });
 
+// Explicit: Nuxt auto-imports composables and utils, not app/config.
+import { workspaceHome } from '../config/navigation.js';
+
 const { register } = useAuth();
+const route = useRoute();
 const router = useRouter();
 
 const form = reactive({
@@ -15,22 +19,43 @@ const form = reactive({
 const submitting = ref(false);
 const errorMessage = ref<string | null>(null);
 
-const passwordTooShort = computed(
-  () => form.password.length > 0 && form.password.length < 8,
+/** Matches the backend's RegisterDto: 8 to 64 characters. */
+const MIN_PASSWORD = 8;
+const passwordLongEnough = computed(() => form.password.length >= MIN_PASSWORD);
+
+/** Same rule as /login: an asked-for page wins, otherwise the role's own workspace. */
+const requestedRedirect = computed(() => {
+  const target = safeRedirect(route.query.redirect);
+  return target === '/' ? null : target;
+});
+const loginLink = computed(() =>
+  requestedRedirect.value
+    ? { path: '/login', query: { redirect: requestedRedirect.value } }
+    : '/login',
 );
 
 const handleSubmit = async () => {
-  submitting.value = true;
   errorMessage.value = null;
+
+  if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
+    errorMessage.value = 'Add your name and email to create your account.';
+    return;
+  }
+  if (!passwordLongEnough.value) {
+    errorMessage.value = `Choose a password of at least ${MIN_PASSWORD} characters.`;
+    return;
+  }
+
+  submitting.value = true;
   try {
-    await register({
-      email: form.email,
+    const user = await register({
+      email: form.email.trim(),
       password: form.password,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      phone: form.phone || undefined,
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      phone: form.phone.trim() || undefined,
     });
-    await router.push('/');
+    await router.push(requestedRedirect.value ?? workspaceHome(user.role));
   } catch (err: any) {
     errorMessage.value =
       err?.data?.message ||
@@ -50,22 +75,25 @@ useSeo({
 
 <template>
   <div>
-    <h1 class="font-display text-3xl font-extrabold tracking-tight text-ink-900">
+    <h1 class="font-display text-[1.75rem] font-semibold leading-tight tracking-tight text-ink-900">
       Create your account
     </h1>
-    <p class="mt-2 text-sm text-ink-500">
-      Order fuel in minutes, or list your own depot on the marketplace.
+    <p class="mt-2 text-[15px] leading-relaxed text-ink-500">
+      One account to order fuel. Selling fuel instead?
+      <NuxtLink
+        to="/become-a-supplier"
+        class="font-semibold text-ink-900 underline decoration-ink-300 underline-offset-4 transition-colors hover:decoration-ink-900"
+      >Apply as a supplier</NuxtLink>.
     </p>
 
-    <form class="mt-8 space-y-4" novalidate @submit.prevent="handleSubmit">
-      <div class="grid gap-4 sm:grid-cols-2">
+    <form class="mt-8 space-y-5" novalidate @submit.prevent="handleSubmit">
+      <div class="grid gap-5 sm:grid-cols-2">
         <BaseAppField id="firstName" label="First name">
           <BaseAppInput
             id="firstName"
             v-model="form.firstName"
             autocomplete="given-name"
             required
-            placeholder="Ama"
           />
         </BaseAppField>
         <BaseAppField id="lastName" label="Last name">
@@ -74,19 +102,21 @@ useSeo({
             v-model="form.lastName"
             autocomplete="family-name"
             required
-            placeholder="Mensah"
           />
         </BaseAppField>
       </div>
 
-      <BaseAppField id="email" label="Email address">
+      <BaseAppField id="email" label="Email">
         <BaseAppInput
           id="email"
           v-model="form.email"
           type="email"
+          inputmode="email"
           autocomplete="email"
+          autocapitalize="none"
+          spellcheck="false"
           required
-          placeholder="you@example.com"
+          placeholder="you@company.com"
         />
       </BaseAppField>
 
@@ -100,49 +130,50 @@ useSeo({
         />
       </BaseAppField>
 
-      <BaseAppField
-        id="password"
-        label="Password"
-        :hint="'At least 8 characters'"
-        :error="passwordTooShort ? 'Password must be at least 8 characters' : null"
-      >
-        <BaseAppInput
+      <BaseAppField id="password" label="Password">
+        <BaseAppPasswordInput
           id="password"
           v-model="form.password"
-          type="password"
           autocomplete="new-password"
           required
           minlength="8"
           maxlength="64"
-          placeholder="••••••••"
-          :invalid="passwordTooShort"
+          aria-describedby="password-rule"
         />
+        <p
+          id="password-rule"
+          class="flex items-center gap-1.5 text-xs transition-colors"
+          :class="passwordLongEnough ? 'text-emerald-700' : 'text-ink-400'"
+        >
+          <!-- A check only once the rule is met; before that it would read as already done. -->
+          <BaseAppIcon v-if="passwordLongEnough" name="check" :size="14" />
+          <span v-else class="flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
+            <span class="h-1.5 w-1.5 rounded-full bg-current" />
+          </span>
+          At least {{ MIN_PASSWORD }} characters
+        </p>
       </BaseAppField>
 
-      <p
+      <div
         v-if="errorMessage"
         role="alert"
-        class="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        class="flex gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm leading-relaxed text-red-700"
       >
-        <BaseAppIcon name="close" :size="16" class="mt-0.5" />
-        {{ errorMessage }}
-      </p>
+        <BaseAppIcon name="alert" :size="18" class="mt-px" />
+        <p>{{ errorMessage }}</p>
+      </div>
 
-      <BaseAppButton
-        type="submit"
-        size="lg"
-        block
-        :loading="submitting"
-        :disabled="passwordTooShort"
-        class="!mt-6"
-      >
+      <BaseAppButton type="submit" variant="dark" size="lg" block :loading="submitting">
         {{ submitting ? 'Creating account…' : 'Create account' }}
       </BaseAppButton>
     </form>
 
-    <p class="mt-8 text-center text-sm text-ink-500">
+    <p class="mt-8 border-t border-ink-100 pt-6 text-sm text-ink-500">
       Already have an account?
-      <NuxtLink to="/login" class="font-semibold text-ink-900 underline underline-offset-4">
+      <NuxtLink
+        :to="loginLink"
+        class="font-semibold text-ink-900 underline decoration-ink-300 underline-offset-4 transition-colors hover:decoration-ink-900"
+      >
         Sign in
       </NuxtLink>
     </p>

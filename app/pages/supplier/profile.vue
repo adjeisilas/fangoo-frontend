@@ -14,6 +14,12 @@ const { data: profile, status } = await useAsyncData('supplier-profile', () => g
 
 const hasProfile = computed(() => !!profile.value);
 
+/** Arriving straight from `/become-a-supplier`. */
+const route = useRoute();
+const justApplied = computed(
+  () => route.query.applied === '1' && profile.value?.verificationStatus === 'PENDING',
+);
+
 const statusTone = computed(() => {
   switch (profile.value?.verificationStatus) {
     case 'VERIFIED':
@@ -77,17 +83,23 @@ const handleSubmit = async () => {
     contactEmail: form.contactEmail,
   };
 
+  // Read before saving: afterwards `profile` is always set.
+  const isNew = !hasProfile.value;
+  const wasVerified = profile.value?.verificationStatus === 'VERIFIED';
+
   try {
-    profile.value = hasProfile.value
-      ? await updateProfile({
+    profile.value = isNew
+      ? await createOrUpdateProfile(shared satisfies CreateSupplierProfileInput)
+      : await updateProfile({
           ...shared,
           isAcceptingOrders: form.isAcceptingOrders,
-        } satisfies UpdateSupplierProfileInput)
-      : await createOrUpdateProfile(shared satisfies CreateSupplierProfileInput);
+        } satisfies UpdateSupplierProfileInput);
 
-    successMessage.value = hasProfile.value
-      ? 'Profile updated.'
-      : 'Profile created — an admin will review it shortly.';
+    successMessage.value = isNew
+      ? 'Profile created — an admin will review it shortly.'
+      : wasVerified && profile.value?.verificationStatus === 'PENDING'
+        ? 'Profile updated. Your legal details changed, so an admin will verify your depot again.'
+        : 'Profile updated.';
   } catch (err: any) {
     errorMessage.value = err?.data?.message || 'We could not save your profile.';
   } finally {
@@ -123,6 +135,21 @@ useSeo({
 
     <template v-else>
       <div
+        v-if="justApplied"
+        role="status"
+        class="mt-6 flex items-start gap-3 rounded-3xl border border-emerald-200 bg-emerald-50 p-5"
+      >
+        <BaseAppIcon name="check" :size="18" class="mt-0.5 text-emerald-700" />
+        <div>
+          <p class="font-semibold text-emerald-900">Application received</p>
+          <p class="mt-1 text-sm text-emerald-800">
+            An admin will review your depot. You can check these details and your
+            delivery coverage in the meantime, and list fuel once you are verified.
+          </p>
+        </div>
+      </div>
+
+      <div
         v-if="profile?.verificationStatus === 'REJECTED' && profile.rejectionReason"
         role="alert"
         class="mt-6 flex items-start gap-3 rounded-3xl border border-red-200 bg-red-50 p-5"
@@ -152,6 +179,10 @@ useSeo({
         <div class="space-y-5">
           <section class="rounded-3xl border border-ink-100 bg-white p-6">
             <h2 class="font-display text-lg font-bold text-ink-900">Business details</h2>
+            <p v-if="profile?.verificationStatus === 'VERIFIED'" class="mt-1 text-xs text-ink-500">
+              Changing the company name, registration number or tax ID sends your depot
+              back for verification.
+            </p>
 
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
               <BaseAppField id="companyName" label="Company name" class="sm:col-span-2">

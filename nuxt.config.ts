@@ -9,6 +9,13 @@ export default defineNuxtConfig({
     configPath: '~~/tailwind.config.ts',
   },
   runtimeConfig: {
+    /**
+     * Server-only API address for server-side rendering (NUXT_API_BASE_SERVER).
+     * Empty means `public.apiBase` is used everywhere. Needed only when the public
+     * URL is not reachable from the web server itself: in docker-compose,
+     * `localhost:4200` inside the web container is not the API.
+     */
+    apiBaseServer: '',
     public: {
       apiBase: 'http://localhost:4000/api/v1',
       /**
@@ -29,9 +36,14 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'theme-color', content: '#0C1322' },
+        // The green of the Fangoo app icon, so the mobile browser bar matches it.
+        { name: 'theme-color', content: '#03633D' },
       ],
       link: [
+        // Generated from app/assets/brand/fangoo-icon-512.png.
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+        { rel: 'icon', type: 'image/png', href: '/icon-192.png', sizes: '192x192' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         {
           rel: 'preconnect',

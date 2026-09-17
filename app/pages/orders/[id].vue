@@ -442,7 +442,7 @@ useSeo(() => ({
             <h2 class="font-display text-lg font-bold text-ink-900">Delivery</h2>
             <p class="mt-3 text-sm font-medium text-ink-900">{{ order.deliveryAddress }}</p>
             <p class="mt-0.5 text-xs text-ink-500">
-              {{ order.deliveryArea.name }} · {{ order.deliveryArea.region }}
+              {{ order.deliveryArea.name }} · {{ order.deliveryArea.region.name }}
             </p>
           </section>
 

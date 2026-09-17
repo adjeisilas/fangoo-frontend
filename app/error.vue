@@ -41,15 +41,8 @@ useHead({
   <div class="flex min-h-screen flex-col bg-sand-50">
     <header class="container-page">
       <div class="flex h-20 items-center">
-        <NuxtLink to="/" class="flex items-center gap-2.5" aria-label="Fangoo home">
-          <span
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 text-brand-400"
-          >
-            <BaseAppIcon name="droplet" :size="18" />
-          </span>
-          <span class="font-display text-lg font-bold tracking-tight text-ink-900">
-            Fangoo
-          </span>
+        <NuxtLink to="/" class="flex items-center" aria-label="Fangoo home">
+          <BaseAppLogo alt="" class="h-12" />
         </NuxtLink>
       </div>
     </header>

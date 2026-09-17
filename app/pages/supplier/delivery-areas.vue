@@ -55,6 +55,8 @@ const selectedCount = computed(
   () => Object.values(rows).filter((row) => row.selected).length,
 );
 
+const regionGroups = computed(() => groupAreasByRegion(deliveryAreas.value));
+
 const saving = ref(false);
 const errorMessage = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
@@ -141,64 +143,77 @@ useSeo({
         </p>
       </div>
 
-      <div class="mt-4 space-y-3">
-        <article
-          v-for="area in deliveryAreas"
-          :key="area.id"
-          class="rounded-3xl border bg-white p-5 transition-colors duration-300"
-          :class="rows[area.id]?.selected ? 'border-brand-200' : 'border-ink-100'"
+      <section
+        v-for="group in regionGroups"
+        :key="group.region.id"
+        class="mt-6"
+        :aria-labelledby="`region-${group.region.id}`"
+      >
+        <h2
+          :id="`region-${group.region.id}`"
+          class="px-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink-400"
         >
-          <label class="flex cursor-pointer items-start gap-3">
-            <input
-              v-model="rows[area.id]!.selected"
-              type="checkbox"
-              class="mt-1 h-5 w-5 rounded accent-brand-500"
-            />
-            <span class="min-w-0">
-              <span class="block font-display text-base font-bold text-ink-900">
-                {{ area.name }}
-              </span>
-              <span class="mt-0.5 block text-xs text-ink-500">
-                {{ area.city }}, {{ area.region }}
-              </span>
-            </span>
-          </label>
-
-          <Transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="-translate-y-2 opacity-0"
-            leave-active-class="transition duration-200 ease-in"
-            leave-to-class="-translate-y-2 opacity-0"
+          {{ group.region.name }}
+        </h2>
+        <div class="mt-3 space-y-3">
+          <article
+            v-for="area in group.areas"
+            :key="area.id"
+            class="rounded-3xl border bg-white p-5 transition-colors duration-300"
+            :class="rows[area.id]?.selected ? 'border-brand-200' : 'border-ink-100'"
           >
-            <div v-if="rows[area.id]?.selected" class="mt-4 grid gap-4 pl-8 sm:grid-cols-2">
-              <BaseAppField :id="`fee-${area.id}`" label="Delivery fee (GHS)">
-                <BaseAppInput
-                  :id="`fee-${area.id}`"
-                  v-model="rows[area.id]!.deliveryFee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                />
-              </BaseAppField>
+            <label class="flex cursor-pointer items-start gap-3">
+              <input
+                v-model="rows[area.id]!.selected"
+                type="checkbox"
+                class="mt-1 h-5 w-5 rounded accent-brand-500"
+              />
+              <span class="min-w-0">
+                <span class="block font-display text-base font-bold text-ink-900">
+                  {{ area.name }}
+                </span>
+                <span class="mt-0.5 block text-xs text-ink-500">
+                  {{ area.city }}
+                </span>
+              </span>
+            </label>
 
-              <BaseAppField
-                :id="`hours-${area.id}`"
-                label="Estimated delivery (hours)"
-                optional
-              >
-                <BaseAppInput
+            <Transition
+              enter-active-class="transition duration-300 ease-out"
+              enter-from-class="-translate-y-2 opacity-0"
+              leave-active-class="transition duration-200 ease-in"
+              leave-to-class="-translate-y-2 opacity-0"
+            >
+              <div v-if="rows[area.id]?.selected" class="mt-4 grid gap-4 pl-8 sm:grid-cols-2">
+                <BaseAppField :id="`fee-${area.id}`" label="Delivery fee (GHS)">
+                  <BaseAppInput
+                    :id="`fee-${area.id}`"
+                    v-model="rows[area.id]!.deliveryFee"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                  />
+                </BaseAppField>
+
+                <BaseAppField
                   :id="`hours-${area.id}`"
-                  v-model="rows[area.id]!.estimatedDeliveryHours"
-                  type="number"
-                  min="1"
-                  step="1"
-                  placeholder="e.g. 4"
-                />
-              </BaseAppField>
-            </div>
-          </Transition>
-        </article>
-      </div>
+                  label="Estimated delivery (hours)"
+                  optional
+                >
+                  <BaseAppInput
+                    :id="`hours-${area.id}`"
+                    v-model="rows[area.id]!.estimatedDeliveryHours"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="e.g. 4"
+                  />
+                </BaseAppField>
+              </div>
+            </Transition>
+          </article>
+        </div>
+      </section>
 
       <div
         class="sticky bottom-4 mt-6 rounded-3xl border border-ink-100 bg-white/95 p-5 shadow-lift backdrop-blur"

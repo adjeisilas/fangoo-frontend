@@ -13,5 +13,9 @@ export default defineVitestConfig({
     environment: 'happy-dom',
     include: ['app/**/*.spec.ts'],
     globals: true,
+    // Specs that opt into `@vitest-environment nuxt` boot the app before their first
+    // hook runs. That boot alone took 8–10s on a busy machine and tipped over
+    // Vitest's 10s default, failing the suite without a single assertion running.
+    hookTimeout: 30_000,
   },
 });

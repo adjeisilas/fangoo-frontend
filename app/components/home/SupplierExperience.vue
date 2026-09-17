@@ -6,6 +6,8 @@ const controls = [
   'Define delivery fees and lead times for each area you cover',
   'Accept or reject every order before you commit a tanker',
 ];
+
+const sellerEntry = useSellerEntry();
 </script>
 
 <template>
@@ -91,7 +93,7 @@ const controls = [
           </li>
         </ul>
 
-        <BaseAppButton to="/supplier/profile" variant="dark" class="mt-9">
+        <BaseAppButton :to="sellerEntry" variant="dark" class="mt-9">
           Become a supplier
           <BaseAppIcon name="arrowUpRight" :size="16" />
         </BaseAppButton>

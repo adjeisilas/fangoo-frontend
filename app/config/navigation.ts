@@ -11,6 +11,8 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+import type { Role } from '../types/auth.js';
+
 export interface WorkspaceConfig {
   /** Short word that tells the user which side of the marketplace they are on. */
   kind: 'Admin' | 'Supplier';
@@ -38,6 +40,7 @@ export const adminWorkspace: WorkspaceConfig = {
         { label: 'Requests', to: '/admin/requests', icon: 'spark' },
         { label: 'Orders', to: '/admin/orders', icon: 'truck' },
         { label: 'Fuel products', to: '/admin/catalogue', icon: 'droplet' },
+        { label: 'Delivery areas', to: '/admin/delivery-areas', icon: 'mapPin' },
       ],
     },
     {
@@ -83,4 +86,17 @@ export const supplierWorkspace: WorkspaceConfig = {
       items: [{ label: 'Company profile', to: '/supplier/profile', icon: 'building' }],
     },
   ],
+};
+
+/**
+ * Where signing in lands someone who did not ask for a particular page.
+ *
+ * Admins and suppliers work inside their dashboards, so sending them to the
+ * marketplace home would mean an extra click on every sign-in. Buyers belong on
+ * the marketplace side, and so does anyone whose role is not yet known.
+ */
+export const workspaceHome = (role?: Role | null): string => {
+  if (role === 'ADMIN') return adminWorkspace.home;
+  if (role === 'SUPPLIER') return supplierWorkspace.home;
+  return '/';
 };

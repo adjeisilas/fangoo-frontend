@@ -1,3 +1,5 @@
+import type { Region } from './delivery-area.js';
+
 export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 
 export interface DeliveryAreaAssignment {
@@ -7,7 +9,7 @@ export interface DeliveryAreaAssignment {
     id: string;
     name: string;
     city: string;
-    region: string;
+    region: Region;
   };
 }
 

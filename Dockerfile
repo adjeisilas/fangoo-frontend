@@ -21,14 +21,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Baked into the client bundle at build time, so they must be present here and
-# not only at run time. The server re-reads them at boot and refuses to start if
-# they still point at localhost — see server/plugins/validate-runtime-config.ts.
-ARG NUXT_PUBLIC_API_BASE
-ARG NUXT_PUBLIC_SITE_URL
-ENV NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE
-ENV NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
-
+# NUXT_PUBLIC_API_BASE and NUXT_PUBLIC_SITE_URL are deliberately absent here.
+# Nuxt resolves public runtime config when the server starts and ships it to the
+# browser in the page payload, so one image serves any environment. They are
+# supplied at run time, and the server refuses to start without valid values —
+# see server/plugins/validate-runtime-config.ts.
 RUN npm run build
 
 FROM node:24-alpine AS runtime

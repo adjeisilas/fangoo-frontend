@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { WorkspaceConfig } from '../../config/navigation.js';
+// The square app mark, not the full logo: the logo's green lettering is unreadable
+// on this dark rail.
+import markUrl from '../../assets/brand/fangoo-mark.png';
 
 defineProps<{ workspace: WorkspaceConfig; open: boolean }>();
 const emit = defineEmits<{ close: [] }>();
@@ -32,11 +35,7 @@ const initials = computed(() => {
   >
     <div class="flex items-center justify-between px-5 py-5">
       <NuxtLink :to="workspace.home" class="flex items-center gap-2.5">
-        <span
-          class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 text-ink-900"
-        >
-          <BaseAppIcon name="droplet" :size="18" />
-        </span>
+        <img :src="markUrl" alt="" width="36" height="36" class="h-9 w-9 shrink-0" />
         <span class="leading-none">
           <span class="block font-display text-base font-bold tracking-tight">Fangoo</span>
           <span class="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-400">

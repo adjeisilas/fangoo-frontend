@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const feature = computed(() => props.offers[0] ?? null);
 const rest = computed(() => props.offers.slice(1, 4));
+const sellerEntry = useSellerEntry();
 </script>
 
 <template>
@@ -42,7 +43,7 @@ const rest = computed(() => props.offers.slice(1, 4));
       title="No live offers yet"
       message="Verified suppliers will appear here as soon as they publish prices."
     >
-      <BaseAppButton to="/supplier/profile" size="sm">List your fuel</BaseAppButton>
+      <BaseAppButton :to="sellerEntry" size="sm">List your fuel</BaseAppButton>
     </BaseAppState>
 
     <!-- Asymmetric: one large anchor, smaller cards stacked beside it. -->

@@ -11,7 +11,14 @@ let inFlightRefresh: Promise<boolean> | null = null;
 
 export const useApi = () => {
   const config = useRuntimeConfig();
-  const apiBase = config.public?.apiBase || 'http://localhost:4000/api/v1';
+  // No fallback: nuxt.config supplies the default, and production refuses to boot
+  // without a valid value (server/plugins/validate-runtime-config.ts).
+  //
+  // Server-side rendering may need a different address. Inside a container, the
+  // public URL's `localhost` is the web container itself, not the API.
+  // `apiBaseServer` is private runtime config, so it only exists on the server.
+  const apiBase =
+    (import.meta.server && config.apiBaseServer) || config.public.apiBase;
   const tokenCookie = useCookie<string | null>('access_token', {
     maxAge: 15 * 60,
     path: '/',

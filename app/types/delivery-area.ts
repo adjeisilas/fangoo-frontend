@@ -1,8 +1,17 @@
+/** A geographic grouping of delivery areas. Never a coverage unit itself. */
+export interface Region {
+  id: string;
+  name: string;
+  capital: string;
+}
+
+/** What a supplier actually covers, grouped by `region`. */
 export interface DeliveryArea {
   id: string;
   name: string;
   city: string;
-  region: string;
+  regionId: string;
+  region: Region;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

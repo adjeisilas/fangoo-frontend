@@ -1,12 +1,15 @@
 <script setup lang="ts">
 const year = new Date().getFullYear();
 
+/** Visitors apply as a supplier directly; see `useSellerEntry`. */
+const sellerEntry = useSellerEntry();
+
 /**
  * Every entry resolves to a distinct real route. The previous version listed three
  * fuel types that all pointed at bare `/marketplace` — links that look like
  * navigation but go nowhere new are the fastest way to make a site feel hollow.
  */
-const columns = [
+const columns = computed(() => [
   {
     title: 'Buy fuel',
     links: [
@@ -18,7 +21,7 @@ const columns = [
   {
     title: 'Sell fuel',
     links: [
-      { label: 'Become a supplier', to: '/register' },
+      { label: 'Become a supplier', to: sellerEntry.value },
       { label: 'Supplier dashboard', to: '/supplier' },
       { label: 'Delivery coverage', to: '/supplier/delivery-areas' },
     ],
@@ -31,7 +34,7 @@ const columns = [
       { label: 'Your orders', to: '/orders' },
     ],
   },
-];
+]);
 </script>
 
 <template>
@@ -48,15 +51,8 @@ const columns = [
       -->
       <div class="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
         <div>
-          <NuxtLink to="/" class="inline-flex items-center gap-2.5" aria-label="Fangoo home">
-            <span
-              class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 text-brand-400"
-            >
-              <BaseAppIcon name="droplet" :size="18" />
-            </span>
-            <span class="font-display text-lg font-bold tracking-tight text-ink-900">
-              Fangoo
-            </span>
+          <NuxtLink to="/" class="inline-flex" aria-label="Fangoo home">
+            <BaseAppLogo alt="" class="h-14" />
           </NuxtLink>
 
           <p class="mt-4 max-w-xs text-sm leading-relaxed text-ink-500">

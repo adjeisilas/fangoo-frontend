@@ -13,6 +13,12 @@ const { data: supplier, status } = await useAsyncData(`checkout-${supplierId}`, 
   getSupplier(supplierId),
 );
 
+/** Reachable by link, so the rule the API enforces has to hold here too. */
+const ownSupplierId = useOwnSupplierId();
+const isOwnDepot = computed(
+  () => !!supplier.value && ownSupplierId.value === supplier.value.id,
+);
+
 const quantities = reactive<Record<string, string>>({});
 const deliveryAreaId = ref('');
 const deliveryAddress = ref('');
@@ -104,6 +110,7 @@ const total = computed(() => subtotal.value + deliveryFee.value);
 
 const canSubmit = computed(
   () =>
+    !isOwnDepot.value &&
     lines.value.length > 0 &&
     Object.keys(lineErrors.value).length === 0 &&
     !!deliveryAreaId.value &&
@@ -164,6 +171,27 @@ useSeo(() => ({
       <BaseAppButton to="/marketplace" size="sm" variant="outline">
         Back to marketplace
       </BaseAppButton>
+    </BaseAppState>
+
+    <!--
+      Reachable by link even though the marketplace hides the button. Says why
+      rather than failing at the last step, after quantities have been filled in.
+    -->
+    <BaseAppState
+      v-else-if="isOwnDepot"
+      variant="empty"
+      heading-level="1"
+      title="This is your own depot"
+      message="An order always has two sides: one account buys, and the depot confirms and delivers it. Order from another supplier, or use a separate buyer account."
+    >
+      <div class="flex flex-wrap justify-center gap-3">
+        <BaseAppButton to="/supplier/fuel-listings" size="sm">
+          Manage your listings
+        </BaseAppButton>
+        <BaseAppButton to="/marketplace" size="sm" variant="outline">
+          Browse other suppliers
+        </BaseAppButton>
+      </div>
     </BaseAppState>
 
     <template v-else>

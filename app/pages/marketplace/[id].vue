@@ -15,6 +15,16 @@ const { data: reviews, status: reviewsStatus } = await useAsyncData(
   { default: () => null },
 );
 
+/**
+ * The API refuses an order placed on your own depot, because the owner would end
+ * up as the buyer of their own order and nobody could confirm it. Offer the thing
+ * that is actually useful here instead.
+ */
+const ownSupplierId = useOwnSupplierId();
+const isOwnDepot = computed(
+  () => !!supplier.value && ownSupplierId.value === supplier.value.id,
+);
+
 const format = (value: string | number, dp = 2) =>
   Number(value).toLocaleString('en-GH', {
     minimumFractionDigits: dp,
@@ -176,11 +186,19 @@ useSeo(() => ({
                     </p>
                   </div>
                   <BaseAppButton
-                    v-if="supplier.isAcceptingOrders"
+                    v-if="supplier.isAcceptingOrders && !isOwnDepot"
                     size="sm"
                     :to="`/checkout/${supplier.id}?fuelTypeId=${listing.fuelType.id}`"
                   >
                     Order
+                  </BaseAppButton>
+                  <BaseAppButton
+                    v-else-if="isOwnDepot"
+                    size="sm"
+                    variant="outline"
+                    to="/supplier/fuel-listings"
+                  >
+                    Edit listing
                   </BaseAppButton>
                 </div>
               </div>
@@ -207,7 +225,7 @@ useSeo(() => ({
               >
                 <p class="font-semibold text-ink-900">{{ area.deliveryArea.name }}</p>
                 <p class="mt-0.5 text-xs text-ink-500">
-                  {{ area.deliveryArea.city }}, {{ area.deliveryArea.region }}
+                  {{ area.deliveryArea.city }}, {{ area.deliveryArea.region.name }}
                 </p>
                 <div class="mt-2.5 flex flex-wrap gap-2">
                   <BaseAppBadge tone="neutral">

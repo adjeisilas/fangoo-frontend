@@ -37,7 +37,7 @@ export interface RuntimeGuardOptions {
  * Empty means it is safe to serve.
  */
 export const runtimeConfigErrors = (
-  input: { apiBase?: unknown; siteUrl?: unknown },
+  input: { apiBase?: unknown; siteUrl?: unknown; apiBaseServer?: unknown },
   options: RuntimeGuardOptions = {},
 ): string[] => {
   const errors: string[] = [];
@@ -67,6 +67,15 @@ export const runtimeConfigErrors = (
     // Wrong here means every canonical, og:url and sitemap entry is wrong.
     errors.push(
       `NUXT_PUBLIC_SITE_URL points at ${siteUrl}. Canonical tags, og:url and sitemap.xml would all advertise localhost.`,
+    );
+  }
+
+  // Optional, and exempt from the localhost rule: only the web server ever calls
+  // it, never a visitor's browser.
+  const apiBaseServer = String(input.apiBaseServer ?? '').trim();
+  if (apiBaseServer && !isAbsoluteHttpUrl(apiBaseServer)) {
+    errors.push(
+      `NUXT_API_BASE_SERVER must be an absolute http(s) URL (got "${apiBaseServer}").`,
     );
   }
 

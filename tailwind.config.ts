@@ -17,17 +17,19 @@ export default <Partial<Config>>{
           900: '#0C1322',
           950: '#060B16',
         },
+        // The orange of the drop and "oo" in the Fangoo logo, anchored at 400 — the
+        // shade primary buttons and accents use. Dark text on 400 is 6.9:1.
         brand: {
-          50: '#FFF9EC',
-          100: '#FFEFC8',
-          200: '#FFDD8C',
-          300: '#FFC64F',
-          400: '#FFB020',
-          500: '#F59505',
-          600: '#D97100',
-          700: '#B44E04',
-          800: '#923D0C',
-          900: '#78330E',
+          50: '#FFF7ED',
+          100: '#FFEBD3',
+          200: '#FFD3A5',
+          300: '#FFAD5C',
+          400: '#FC7C00',
+          500: '#E86E00',
+          600: '#C45A00',
+          700: '#9D4705',
+          800: '#7F3A0B',
+          900: '#68310D',
         },
         sand: {
           50: '#FCFBF8',
@@ -35,6 +37,11 @@ export default <Partial<Config>>{
           200: '#EDE9DF',
           300: '#DFD9C9',
         },
+      },
+      spacing: {
+        // Tailwind's default scale skips 13. `AppButton` size="lg" uses `h-13`, which
+        // silently generated nothing until this existed.
+        13: '3.25rem',
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -47,7 +54,7 @@ export default <Partial<Config>>{
       boxShadow: {
         soft: '0 2px 8px -2px rgb(12 19 34 / 0.06), 0 12px 32px -8px rgb(12 19 34 / 0.10)',
         lift: '0 8px 20px -6px rgb(12 19 34 / 0.12), 0 24px 48px -12px rgb(12 19 34 / 0.16)',
-        glow: '0 10px 40px -12px rgb(245 149 5 / 0.45)',
+        glow: '0 10px 40px -12px rgb(252 124 0 / 0.35)',
       },
       keyframes: {
         'fade-up': {

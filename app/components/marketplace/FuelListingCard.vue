@@ -36,6 +36,13 @@ const stockTone = computed(() => {
 });
 
 const outOfStock = computed(() => Number(props.listing.availableQuantity) <= 0);
+
+/**
+ * The API refuses an order placed on your own depot, so a supplier browsing the
+ * marketplace gets their listing editor rather than a button that always fails.
+ */
+const ownSupplierId = useOwnSupplierId();
+const isOwnDepot = computed(() => ownSupplierId.value === props.supplier.id);
 </script>
 
 <template>
@@ -144,12 +151,16 @@ const outOfStock = computed(() => Number(props.listing.availableQuantity) <= 0);
         Details
       </BaseAppButton>
       <BaseAppButton
+        v-if="!isOwnDepot"
         :to="`/checkout/${supplier.id}?fuelTypeId=${listing.fuelType.id}`"
         :variant="best ? 'primary' : 'dark'"
         size="sm"
       >
         Order
         <BaseAppIcon name="arrowRight" :size="15" />
+      </BaseAppButton>
+      <BaseAppButton v-else to="/supplier/fuel-listings" variant="outline" size="sm">
+        Your depot
       </BaseAppButton>
     </div>
   </article>

@@ -18,6 +18,7 @@ export default defineEventHandler((event) => {
     '/checkout/',
     '/login',
     '/register',
+    '/become-a-supplier',
   ];
 
   const body = [

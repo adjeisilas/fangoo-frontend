@@ -191,7 +191,7 @@ useSeo(() => ({
               <dd class="text-right font-semibold text-ink-900">
                 {{ request.deliveryArea.name }}
                 <span class="block text-xs font-normal text-ink-400">
-                  {{ request.deliveryArea.city }}, {{ request.deliveryArea.region }}
+                  {{ request.deliveryArea.city }}, {{ request.deliveryArea.region.name }}
                 </span>
               </dd>
             </div>

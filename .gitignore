@@ -25,3 +25,12 @@ neuroforge/
 .env
 .env.*
 !.env.example
+
+# AI assistant tooling: per-tool configuration and vendored skill packs. None of
+# it is needed to build, test or run Fangoo. The project's own
+# .agents/skills/neuroforge-nuxt stays tracked.
+.claude/
+.cursor/
+.devin/
+.windsurf/
+skills-lock.json

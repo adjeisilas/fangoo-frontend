@@ -92,20 +92,12 @@ const handleLogout = async () => {
         class="flex items-center justify-between transition-all duration-300"
         :class="scrolled ? 'h-16' : 'h-20'"
       >
-        <NuxtLink to="/" class="group flex items-center gap-2.5" aria-label="Fangoo home">
-          <span
-            class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-900 text-brand-400 transition-transform duration-300 group-hover:-rotate-6"
-          >
-            <BaseAppIcon name="droplet" :size="18" />
-          </span>
-          <span class="leading-none">
-            <span class="block font-display text-lg font-bold tracking-tight text-ink-900">
-              Fangoo
-            </span>
-            <span class="block text-[10px] font-medium uppercase tracking-[0.18em] text-ink-400">
-              Fuel delivery
-            </span>
-          </span>
+        <NuxtLink to="/" class="flex items-center" aria-label="Fangoo home">
+          <BaseAppLogo
+            alt=""
+            class="transition-[height] duration-300"
+            :class="scrolled ? 'h-10' : 'h-12'"
+          />
         </NuxtLink>
 
         <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">

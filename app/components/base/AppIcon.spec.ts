@@ -18,7 +18,7 @@ describe('AppIcon', () => {
     'droplet', 'truck', 'shield', 'search', 'arrowRight', 'arrowUpRight',
     'check', 'star', 'mapPin', 'clock', 'wallet', 'menu', 'close', 'user',
     'filter', 'chevronDown', 'gauge', 'leaf', 'headset', 'spark', 'building',
-    'bell',
+    'bell', 'eye', 'eyeOff', 'alert',
   ])('has a definition for "%s"', (name) => {
     expect(render(name).find('path').attributes('d')).toBeTruthy();
   });

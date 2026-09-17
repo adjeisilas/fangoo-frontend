@@ -19,6 +19,8 @@ const verifiedCount = computed(
   () => suppliers.value.filter((s) => s.verificationStatus === 'VERIFIED').length,
 );
 
+const sellerEntry = useSellerEntry();
+
 /** Buying from the catalogue: you pick the supplier. */
 const catalogueSteps = [
   {
@@ -352,7 +354,7 @@ useSeo({
               You set your own prices, your own coverage and your own minimum order.
               Fangoo brings you buyers who have already decided to spend.
             </p>
-            <BaseAppButton to="/register" class="mt-7">
+            <BaseAppButton :to="sellerEntry" class="mt-7">
               Become a supplier
               <BaseAppIcon name="arrowRight" :size="16" />
             </BaseAppButton>

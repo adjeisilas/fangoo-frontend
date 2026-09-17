@@ -3,9 +3,9 @@ import { runtimeConfigErrors } from '../../app/composables/useRuntimeGuards.js';
 /**
  * Refuses to start a production server that is pointing at the wrong place.
  *
- * The defaults in `nuxt.config.ts` are development conveniences: `apiBase` points
- * at localhost and `siteUrl` at the intended production domain. Neither is
- * validated by Nuxt, so a deploy that forgets `NUXT_PUBLIC_API_BASE` builds
+ * The defaults in `nuxt.config.ts` are development conveniences that point both
+ * `apiBase` and `siteUrl` at localhost. Neither is validated by Nuxt, so a
+ * deploy that forgets `NUXT_PUBLIC_API_BASE` builds
  * cleanly, serves cleanly, and then asks every visitor's browser to call
  * `localhost:4000` — their own machine. Nothing appears in the server logs,
  * because the failure happens in the visitor's browser.
@@ -22,6 +22,7 @@ export default defineNitroPlugin(() => {
     {
       apiBase: config.public?.apiBase,
       siteUrl: config.public?.siteUrl,
+      apiBaseServer: config.apiBaseServer,
     },
     {
       // Read from process.env, not runtimeConfig, so it can never be baked into

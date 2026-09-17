@@ -82,5 +82,7 @@ export const useAuth = () => {
     login,
     fetchUser,
     logout,
+    // For flows that create the account themselves, such as supplier applications.
+    startSession,
   };
 };

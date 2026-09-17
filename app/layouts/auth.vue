@@ -1,58 +1,66 @@
 <script setup lang="ts">
-const highlights = [
-  'Compare verified suppliers side by side',
-  'See stock and minimum order before you commit',
-  'Track every order from depot to doorstep',
-];
+import { imagery } from '../config/imagery.js';
 </script>
 
 <template>
-  <div class="min-h-screen bg-sand-50 lg:grid lg:grid-cols-2">
-    <!-- Brand panel: decorative, so it is skipped on small screens entirely. -->
-    <aside class="surface-grain relative hidden overflow-hidden bg-ink-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-      <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div class="absolute -left-16 top-1/3 h-80 w-80 rounded-full bg-brand-500/25 blur-[100px]" />
-        <div class="absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-brand-400/10 blur-[90px]" />
-      </div>
-
-      <NuxtLink to="/" class="relative flex items-center gap-2.5">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-400 text-ink-900">
-          <BaseAppIcon name="droplet" :size="20" />
-        </span>
-        <span class="font-display text-xl font-bold tracking-tight">Fangoo</span>
-      </NuxtLink>
-
-      <div class="relative">
-        <h2 class="max-w-md font-display text-4xl font-extrabold leading-[1.1] tracking-tight">
-          Fuel delivered, without the queue.
-        </h2>
-        <ul class="mt-8 space-y-4">
-          <li v-for="item in highlights" :key="item" class="flex items-start gap-3 text-sm text-ink-200">
-            <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-400 text-ink-900">
-              <BaseAppIcon name="check" :size="13" />
-            </span>
-            {{ item }}
-          </li>
-        </ul>
-      </div>
-
-      <p class="relative flex items-center gap-2 text-xs text-ink-400">
-        <BaseAppIcon name="shield" :size="14" class="text-brand-400" />
-        Every supplier is verified before they can accept an order.
-      </p>
-    </aside>
-
-    <main class="flex min-h-screen items-center justify-center px-5 py-12 sm:px-8">
-      <div class="w-full max-w-md">
-        <NuxtLink to="/" class="mb-8 flex items-center gap-2.5 lg:hidden">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-900 text-brand-400">
-            <BaseAppIcon name="droplet" :size="20" />
-          </span>
-          <span class="font-display text-xl font-bold tracking-tight text-ink-900">Fangoo</span>
+  <div class="min-h-screen bg-sand-50 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div class="flex min-h-screen flex-col px-5 py-6 sm:px-10 lg:px-14">
+      <header class="flex items-center justify-between gap-4">
+        <NuxtLink to="/" class="flex items-center" aria-label="Fangoo home">
+          <BaseAppLogo alt="" class="h-12" />
         </NuxtLink>
 
-        <slot />
+        <NuxtLink
+          to="/marketplace"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition-colors hover:text-ink-900"
+        >
+          Browse fuel
+          <BaseAppIcon name="arrowRight" :size="15" />
+        </NuxtLink>
+      </header>
+
+      <main class="flex flex-1 items-center py-12">
+        <div class="mx-auto w-full max-w-[26rem]">
+          <slot />
+        </div>
+      </main>
+
+      <footer class="text-balance text-xs text-ink-400">
+        Prices in Ghana Cedis (GHS) · Payments processed by Paystack
+      </footer>
+    </div>
+
+    <!-- Desktop only. Lazy, so a phone that never shows the panel never downloads it. -->
+    <aside class="hidden lg:sticky lg:top-0 lg:block lg:h-screen lg:self-start">
+      <!-- Full bleed: no padding, corners or ring, so the photo reaches every edge. -->
+      <div class="relative h-full overflow-hidden bg-ink-950">
+        <img
+          :src="imagery.loadingBay.src"
+          alt=""
+          :width="imagery.loadingBay.width"
+          :height="imagery.loadingBay.height"
+          loading="lazy"
+          decoding="async"
+          class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/40 to-ink-950/25"
+          aria-hidden="true"
+        />
+
+        <div class="absolute inset-x-0 bottom-0 p-10 xl:p-12">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-300">
+            Fuel marketplace · Ghana
+          </p>
+          <p class="mt-4 max-w-md font-display text-3xl font-semibold leading-tight tracking-tight text-white">
+            Buy fuel from verified depots, at prices you can compare.
+          </p>
+          <p class="mt-4 max-w-md text-sm leading-relaxed text-ink-200">
+            Every supplier is checked before they can take an order. You pay through
+            Paystack and follow each order from confirmation to delivery.
+          </p>
+        </div>
       </div>
-    </main>
+    </aside>
   </div>
 </template>
