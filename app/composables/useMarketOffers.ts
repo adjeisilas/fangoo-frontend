@@ -66,6 +66,31 @@ export const useMarketOffers = (suppliers: Ref<PublicSupplier[]>) => {
   return { offers, cheapest, supplierCount, fuelCount };
 };
 
+export interface OfferedFuel {
+  id: string;
+  name: string;
+  offerCount: number;
+}
+
+/**
+ * The fuels that have at least one live offer, most-offered first (then A–Z).
+ * Prices are only comparable within one fuel, so the home panel shows one of
+ * these at a time, starting with the one buyers have the most choice in.
+ */
+export const fuelsOnOffer = (offers: MarketOffer[]): OfferedFuel[] => {
+  const fuels = new Map<string, OfferedFuel>();
+
+  for (const offer of offers) {
+    const fuel = fuels.get(offer.fuelTypeId) ?? { id: offer.fuelTypeId, name: offer.fuelName, offerCount: 0 };
+    fuel.offerCount += 1;
+    fuels.set(offer.fuelTypeId, fuel);
+  }
+
+  return [...fuels.values()].sort(
+    (a, b) => b.offerCount - a.offerCount || a.name.localeCompare(b.name),
+  );
+};
+
 export const formatGhs = (value: number, dp = 2) =>
   value.toLocaleString('en-GH', {
     minimumFractionDigits: dp,

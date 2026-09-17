@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ref } from 'vue';
-import { useMarketOffers, formatGhs } from './useMarketOffers.js';
+import { useMarketOffers, formatGhs, fuelsOnOffer, type MarketOffer } from './useMarketOffers.js';
 import type { PublicSupplier } from '../types/supplier.js';
 
 /**
@@ -24,7 +24,7 @@ const supplier = (over: Partial<PublicSupplier> = {}): PublicSupplier =>
       {
         deliveryFee: '250',
         estimatedDeliveryHours: 6,
-        deliveryArea: { id: 'a1', name: 'Tema', city: 'Tema', region: 'Greater Accra' },
+        deliveryArea: { id: 'a1', name: 'Tema', city: 'Tema', region: { id: 'r-ga', name: 'Greater Accra Region', capital: 'Accra' } },
       },
     ],
     fuelListings: [
@@ -74,8 +74,8 @@ describe('useMarketOffers', () => {
       ref([
         supplier({
           deliveryAreas: [
-            { deliveryFee: '900', estimatedDeliveryHours: 4, deliveryArea: { id: 'a1', name: 'Far', city: 'X', region: 'Y' } },
-            { deliveryFee: '120', estimatedDeliveryHours: 12, deliveryArea: { id: 'a2', name: 'Near', city: 'X', region: 'Y' } },
+            { deliveryFee: '900', estimatedDeliveryHours: 4, deliveryArea: { id: 'a1', name: 'Far', city: 'X', region: { id: 'r-y', name: 'Y', capital: 'X' } } },
+            { deliveryFee: '120', estimatedDeliveryHours: 12, deliveryArea: { id: 'a2', name: 'Near', city: 'X', region: { id: 'r-y', name: 'Y', capital: 'X' } } },
           ],
         } as Partial<PublicSupplier>),
       ]),
@@ -149,5 +149,40 @@ describe('formatGhs', () => {
 
   it('can drop decimals for whole-litre figures', () => {
     expect(formatGhs(2999, 0)).toBe('2,999');
+  });
+});
+
+describe('fuelsOnOffer', () => {
+  const offer = (fuelTypeId: string, fuelName: string, supplierId: string) =>
+    ({ key: `${supplierId}-${fuelTypeId}`, supplierId, fuelTypeId, fuelName }) as MarketOffer;
+
+  it('lists each offered fuel once, most offers first', () => {
+    const fuels = fuelsOnOffer([
+      offer('ker', 'Kerosene (DPK)', 's1'),
+      offer('ago', 'Diesel (AGO)', 's1'),
+      offer('ago', 'Diesel (AGO)', 's2'),
+      offer('pms', 'Petrol (PMS)', 's2'),
+      offer('ago', 'Diesel (AGO)', 's3'),
+      offer('pms', 'Petrol (PMS)', 's3'),
+    ]);
+
+    expect(fuels).toEqual([
+      { id: 'ago', name: 'Diesel (AGO)', offerCount: 3 },
+      { id: 'pms', name: 'Petrol (PMS)', offerCount: 2 },
+      { id: 'ker', name: 'Kerosene (DPK)', offerCount: 1 },
+    ]);
+  });
+
+  it('breaks ties alphabetically, whatever the offer order', () => {
+    const names = fuelsOnOffer([
+      offer('pms', 'Petrol (PMS)', 's1'),
+      offer('lpg', 'Cooking Gas (LPG)', 's1'),
+    ]).map((fuel) => fuel.name);
+
+    expect(names).toEqual(['Cooking Gas (LPG)', 'Petrol (PMS)']);
+  });
+
+  it('is empty when nothing is on offer', () => {
+    expect(fuelsOnOffer([])).toEqual([]);
   });
 });

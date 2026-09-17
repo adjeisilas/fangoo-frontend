@@ -1,15 +1,30 @@
 <script setup lang="ts">
 import type { MarketOffer } from '../../composables/useMarketOffers.js';
-import { formatGhs } from '../../composables/useMarketOffers.js';
+import { formatGhs, fuelsOnOffer } from '../../composables/useMarketOffers.js';
 
 const props = defineProps<{
   offers: MarketOffer[];
   status: 'idle' | 'pending' | 'success' | 'error';
 }>();
 
-const visible = computed(() => props.offers.slice(0, 3));
+// Prices only compare within one fuel, so the panel shows one fuel at a time.
+const fuels = computed(() => fuelsOnOffer(props.offers).slice(0, 4));
+const picked = ref<string | null>(null);
+const activeFuel = computed(
+  () => fuels.value.find((fuel) => fuel.id === picked.value) ?? fuels.value[0] ?? null,
+);
 
-const cheapestPrice = computed(() => props.offers[0]?.pricePerLitre ?? null);
+// `offers` arrives cheapest first, so the filtered list is too.
+const fuelOffers = computed(() =>
+  props.offers.filter((offer) => offer.fuelTypeId === activeFuel.value?.id),
+);
+const visible = computed(() => fuelOffers.value.slice(0, 3));
+
+const cheapestPrice = computed(() => fuelOffers.value[0]?.pricePerLitre ?? null);
+
+const compareLink = computed(() =>
+  activeFuel.value ? `/marketplace?fuelTypeId=${activeFuel.value.id}` : '/marketplace',
+);
 
 /** How much more than the best price this offer costs, per litre. */
 const deltaFromBest = (offer: MarketOffer) =>
@@ -37,24 +52,36 @@ const deltaFromBest = (offer: MarketOffer) =>
         </span>
       </div>
 
-      <div class="mt-2.5 grid grid-cols-3 gap-2">
-        <div class="rounded-xl border border-ink-100 bg-white px-2.5 py-2">
-          <p class="text-[10px] uppercase tracking-wide text-ink-400">Fuel</p>
-          <p class="mt-0.5 truncate text-xs font-semibold text-ink-900">
-            {{ visible[0]?.fuelName ?? 'Any fuel' }}
-          </p>
-        </div>
-        <div class="rounded-xl border border-ink-100 bg-white px-2.5 py-2">
-          <p class="text-[10px] uppercase tracking-wide text-ink-400">Quantity</p>
-          <p class="mt-0.5 text-xs font-semibold text-ink-900">5,000 L</p>
-        </div>
-        <div class="rounded-xl border border-ink-100 bg-white px-2.5 py-2">
-          <p class="text-[10px] uppercase tracking-wide text-ink-400">Deliver to</p>
-          <p class="mt-0.5 truncate text-xs font-semibold text-ink-900">
-            {{ visible[0]?.areaName ?? 'Greater Accra' }}
-          </p>
-        </div>
+      <div
+        v-if="fuels.length"
+        class="mt-2.5 flex flex-wrap gap-1.5"
+        role="tablist"
+        aria-label="Fuel type"
+      >
+        <button
+          v-for="fuel in fuels"
+          :key="fuel.id"
+          type="button"
+          role="tab"
+          :aria-selected="fuel.id === activeFuel?.id"
+          class="flex shrink-0 items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-semibold transition-colors"
+          :class="
+            fuel.id === activeFuel?.id
+              ? 'border-ink-900 bg-ink-900 text-white'
+              : 'border-ink-100 bg-white text-ink-600 hover:border-ink-300 hover:text-ink-900'
+          "
+          @click="picked = fuel.id"
+        >
+          {{ fuel.name }}
+          <span
+            class="text-[10px] font-medium"
+            :class="fuel.id === activeFuel?.id ? 'text-white/60' : 'text-ink-400'"
+          >
+            {{ fuel.offerCount }}
+          </span>
+        </button>
       </div>
+      <p v-else class="mt-2 text-xs text-ink-500">Petrol, diesel, kerosene and LPG</p>
     </div>
 
     <!-- Offer rows -->
@@ -102,7 +129,10 @@ const deltaFromBest = (offer: MarketOffer) =>
               </span>
             </div>
             <p class="mt-0.5 truncate text-[11px] text-ink-500">
-              {{ offer.fuelName }} · {{ offer.city }}
+              {{ offer.city }}
+              <template v-if="offer.minimumOrderLitres">
+                · min. {{ formatGhs(offer.minimumOrderLitres, 0) }} L
+              </template>
             </p>
           </div>
 
@@ -155,10 +185,15 @@ const deltaFromBest = (offer: MarketOffer) =>
     </ul>
 
     <NuxtLink
-      to="/marketplace"
+      :to="compareLink"
       class="mt-3 flex items-center justify-between rounded-2xl bg-ink-950 px-4 py-3 text-white transition-colors hover:bg-ink-800"
     >
-      <span class="text-xs font-semibold">Compare all suppliers</span>
+      <span class="text-xs font-semibold">
+        <template v-if="activeFuel && fuelOffers.length > visible.length">
+          Compare all {{ fuelOffers.length }} {{ activeFuel.name }} offers
+        </template>
+        <template v-else>Compare all suppliers</template>
+      </span>
       <BaseAppIcon name="arrowRight" :size="15" class="text-brand-400" />
     </NuxtLink>
   </div>
