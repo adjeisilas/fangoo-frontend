@@ -3,11 +3,7 @@ import type { User, AuthResponse } from '../types/auth.js';
 export const useAuth = () => {
   const api = useApi();
   const user = useState<User | null>('auth_user', () => null);
-  const tokenCookie = useCookie<string | null>('access_token', {
-    maxAge: 15 * 60, // 15 minutes
-    path: '/',
-    sameSite: 'lax',
-  });
+  const tokenCookie = useAccessTokenCookie();
 
   /**
    * Shared with `fetch-user.global.ts`, which silently refreshes once per

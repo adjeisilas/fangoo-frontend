@@ -19,11 +19,7 @@ export const useApi = () => {
   // `apiBaseServer` is private runtime config, so it only exists on the server.
   const apiBase =
     (import.meta.server && config.apiBaseServer) || config.public.apiBase;
-  const tokenCookie = useCookie<string | null>('access_token', {
-    maxAge: 15 * 60,
-    path: '/',
-    sameSite: 'lax',
-  });
+  const tokenCookie = useAccessTokenCookie();
 
   /**
    * Exchanges the httpOnly `refresh_token` cookie for a fresh access token.
